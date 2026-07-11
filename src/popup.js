@@ -8,10 +8,16 @@
   const logo = document.getElementById('logo');
   const setLogo = (state) => { logo.src = B.runtime.getURL(`icons/f-${state}-48.png`); };
 
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
-      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-    ));
+  // Helper DOM : construit des nœuds (jamais d'innerHTML avec des valeurs dynamiques).
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    if (attrs) for (const k in attrs) {
+      if (k === 'class') n.className = attrs[k];
+      else if (k === 'text') n.textContent = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    }
+    for (const c of kids) if (c != null) n.append(c);
+    return n;
   }
   function frDate(iso) {
     const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || '');
@@ -25,43 +31,48 @@
   function renderAlert(host, hits, site) {
     app.className = 'state-alert';
     setLogo('alert');
-    const cards = hits.slice(0, 4).map((h) => `
-      <div class="card">
-        <div class="name">${esc(h.n)}</div>
-        <div class="row">
-          <span class="badge ${isConf(h.s) ? 'conf' : 'rev'}">${esc(h.s || '')}</span>
-          <span class="date">${esc(frDate(h.y))}</span>
-        </div>
-      </div>`).join('');
-    const extra = hits.length > 4 ? `<div class="more">+ ${hits.length - 4} autre(s) incident(s)</div>` : '';
+    const cards = hits.slice(0, 4).map((h) =>
+      el('div', { class: 'card' },
+        el('div', { class: 'name', text: h.n || '' }),
+        el('div', { class: 'row' },
+          el('span', { class: `badge ${isConf(h.s) ? 'conf' : 'rev'}`, text: h.s || '' }),
+          el('span', { class: 'date', text: frDate(h.y) }),
+        ),
+      ));
     const top = hits[0];
     const link = top.id ? `${site}/?leak=${encodeURIComponent(top.id)}` : site;
-    content.innerHTML = `
-      <p class="alert-title">Ce site ou cette entité a déjà laissé fuiter des données.</p>
-      ${cards}${extra}
-      <a class="cta" href="${esc(link)}" target="_blank" rel="noopener noreferrer">Détails sur fuitesinfos.fr</a>
-    `;
+    content.replaceChildren(
+      el('p', { class: 'alert-title', text: 'Ce site ou cette entité a déjà laissé fuiter des données.' }),
+      ...cards,
+      hits.length > 4 ? el('div', { class: 'more', text: `+ ${hits.length - 4} autre(s) incident(s)` }) : document.createComment(''),
+      el('a', { class: 'cta', href: link, target: '_blank', rel: 'noopener noreferrer', text: 'Détails sur fuitesinfos.fr' }),
+    );
   }
 
   function renderOk(host) {
     app.className = 'state-ok';
-    content.innerHTML = `
-      <div class="ok-wrap">
-        <div class="ok-ic">✓</div>
-        <div class="ok-title">Aucune fuite connue</div>
-        <div class="ok-sub">Ce site n'apparaît pas dans la base Fuites Infos.</div>
-        ${host ? `<div class="host">${esc(host)}</div>` : ''}
-      </div>`;
+    content.replaceChildren(
+      el('div', { class: 'ok-wrap' },
+        el('div', { class: 'ok-ic', text: '✓' }),
+        el('div', { class: 'ok-title', text: 'Aucune fuite connue' }),
+        el('div', { class: 'ok-sub', text: "Ce site n'apparaît pas dans la base Fuites Infos." }),
+        host ? el('div', { class: 'host', text: host }) : null,
+      ),
+    );
   }
 
   function renderNeutral() {
     app.className = 'state-neutral';
-    content.innerHTML = `
-      <div class="ok-wrap">
-        <div class="ok-ic" style="background:#e5e7eb;color:#6b7280">—</div>
-        <div class="ok-title">Page non analysable</div>
-        <div class="ok-sub">Ouvrez un site web pour lancer la vérification.</div>
-      </div>`;
+    const ic = el('div', { class: 'ok-ic', text: '—' });
+    ic.style.background = '#e5e7eb';
+    ic.style.color = '#6b7280';
+    content.replaceChildren(
+      el('div', { class: 'ok-wrap' },
+        ic,
+        el('div', { class: 'ok-title', text: 'Page non analysable' }),
+        el('div', { class: 'ok-sub', text: 'Ouvrez un site web pour lancer la vérification.' }),
+      ),
+    );
   }
 
   B.runtime.sendMessage({ type: 'getPopupData' }, (resp) => {

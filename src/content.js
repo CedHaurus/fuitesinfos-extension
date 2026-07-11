@@ -20,10 +20,16 @@
     render(resp.hits, resp.site || 'https://fuitesinfos.fr');
   });
 
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
-      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-    ));
+  // Helper DOM : construit des nœuds (jamais d'innerHTML avec des valeurs dynamiques).
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    if (attrs) for (const k in attrs) {
+      if (k === 'class') n.className = attrs[k];
+      else if (k === 'text') n.textContent = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    }
+    for (const c of kids) if (c != null) n.append(c);
+    return n;
   }
 
   function frDate(iso) {
@@ -48,63 +54,60 @@
     holder.style.cssText = 'all: initial; position: fixed; inset: 0; z-index: 2147483647;';
     const root = holder.attachShadow({ mode: 'closed' });
 
-    root.innerHTML = `
-      <style>
-        :host { all: initial; }
-        * { box-sizing: border-box; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .backdrop {
-          position: fixed; inset: 0; background: rgba(10, 10, 12, 0.55);
-          backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center;
-          padding: 24px; animation: fade .18s ease-out;
-        }
-        @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98) } to { opacity: 1; transform: none } }
-        .card {
-          position: relative; width: min(520px, 100%);
-          background: #fff; border-radius: 16px; overflow: hidden;
-          box-shadow: 0 24px 60px rgba(0,0,0,.4); border-top: 6px solid #dc2626;
-          animation: pop .2s ease-out;
-        }
-        .body { padding: 30px 30px 26px; text-align: center; }
-        .mark {
-          width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 16px;
-          object-fit: cover; display: block;
-        }
-        h1 { color: #dc2626; font-size: 20px; font-weight: 800; line-height: 1.3; margin-bottom: 6px; }
-        .paren { color: #b91c1c; font-weight: 700; }
-        .entity { margin-top: 12px; color: #111827; font-size: 15px; font-weight: 600; }
-        .meta { margin-top: 4px; color: #6b7280; font-size: 13px; }
-        .more { margin-top: 6px; color: #9ca3af; font-size: 12px; }
-        .cta {
-          display: inline-block; margin-top: 20px; padding: 11px 20px; border-radius: 10px;
-          background: #dc2626; color: #fff; text-decoration: none; font-weight: 700; font-size: 14px;
-        }
-        .cta:hover { background: #b91c1c; }
-        .foot { margin-top: 14px; color: #9ca3af; font-size: 11px; }
-        .close {
-          position: absolute; top: 10px; right: 10px; width: 32px; height: 32px;
-          border: none; border-radius: 8px; background: #f3f4f6; color: #6b7280;
-          font-size: 20px; line-height: 1; cursor: pointer;
-        }
-        .close:hover { background: #e5e7eb; color: #111827; }
-      </style>
-      <div class="backdrop" part="backdrop">
-        <div class="card" role="alertdialog" aria-modal="true" aria-label="Alerte fuite de données">
-          <button class="close" title="Fermer" aria-label="Fermer">&times;</button>
-          <div class="body">
-            <img class="mark" src="${iconUrl}" alt="">
-            <h1>Ce site internet ou cette entreprise a été victime d'une fuite de données
-              <span class="paren">(${esc(statut)})</span>
-            </h1>
-            <div class="entity">${esc(top.n)}</div>
-            <div class="meta">Fuite ${esc(statut)} — ${esc(frDate(top.y))}</div>
-            ${hits.length > 1 ? `<div class="more">+ ${hits.length - 1} autre(s) incident(s) recensé(s)</div>` : ''}
-            <a class="cta" href="${esc(link)}" target="_blank" rel="noopener noreferrer">Voir sur fuitesinfos.fr</a>
-            <div class="foot">Source : fuitesinfos.fr</div>
-          </div>
-        </div>
-      </div>
+    const style = document.createElement('style');
+    style.textContent = `
+      :host { all: initial; }
+      * { box-sizing: border-box; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+      .backdrop {
+        position: fixed; inset: 0; background: rgba(10, 10, 12, 0.55);
+        backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center;
+        padding: 24px; animation: fade .18s ease-out;
+      }
+      @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
+      @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98) } to { opacity: 1; transform: none } }
+      .card {
+        position: relative; width: min(520px, 100%);
+        background: #fff; border-radius: 16px; overflow: hidden;
+        box-shadow: 0 24px 60px rgba(0,0,0,.4); border-top: 6px solid #dc2626;
+        animation: pop .2s ease-out;
+      }
+      .body { padding: 30px 30px 26px; text-align: center; }
+      .mark { width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 16px; object-fit: cover; display: block; }
+      h1 { color: #dc2626; font-size: 20px; font-weight: 800; line-height: 1.3; margin-bottom: 6px; }
+      .paren { color: #b91c1c; font-weight: 700; }
+      .entity { margin-top: 12px; color: #111827; font-size: 15px; font-weight: 600; }
+      .meta { margin-top: 4px; color: #6b7280; font-size: 13px; }
+      .more { margin-top: 6px; color: #9ca3af; font-size: 12px; }
+      .cta {
+        display: inline-block; margin-top: 20px; padding: 11px 20px; border-radius: 10px;
+        background: #dc2626; color: #fff; text-decoration: none; font-weight: 700; font-size: 14px;
+      }
+      .cta:hover { background: #b91c1c; }
+      .foot { margin-top: 14px; color: #9ca3af; font-size: 11px; }
+      .close {
+        position: absolute; top: 10px; right: 10px; width: 32px; height: 32px;
+        border: none; border-radius: 8px; background: #f3f4f6; color: #6b7280;
+        font-size: 20px; line-height: 1; cursor: pointer;
+      }
+      .close:hover { background: #e5e7eb; color: #111827; }
     `;
+
+    const card = el('div', { class: 'card', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': 'Alerte fuite de données' },
+      el('button', { class: 'close', title: 'Fermer', 'aria-label': 'Fermer', text: '×' }),
+      el('div', { class: 'body' },
+        el('img', { class: 'mark', src: iconUrl, alt: '' }),
+        el('h1', null,
+          "Ce site internet ou cette entreprise a été victime d'une fuite de données ",
+          el('span', { class: 'paren', text: `(${statut})` }),
+        ),
+        el('div', { class: 'entity', text: top.n || '' }),
+        el('div', { class: 'meta', text: `Fuite ${statut} — ${frDate(top.y)}` }),
+        hits.length > 1 ? el('div', { class: 'more', text: `+ ${hits.length - 1} autre(s) incident(s) recensé(s)` }) : null,
+        el('a', { class: 'cta', href: link, target: '_blank', rel: 'noopener noreferrer', text: 'Voir sur fuitesinfos.fr' }),
+        el('div', { class: 'foot', text: 'Source : fuitesinfos.fr' }),
+      ),
+    );
+    root.append(style, el('div', { class: 'backdrop', part: 'backdrop' }, card));
 
     (document.body || document.documentElement).appendChild(holder);
 
