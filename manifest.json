@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "> Fuites Infos",
+  "version": "1.0.0",
+  "description": "Vous alerte quand le site visité appartient à une entité déjà victime d'une fuite de données recensée sur fuitesinfos.fr.",
+  "icons": {
+    "16": "icons/f-idle-16.png",
+    "32": "icons/f-idle-32.png",
+    "48": "icons/f-idle-48.png",
+    "128": "icons/f-idle-128.png"
+  },
+  "permissions": ["tabs", "storage", "alarms"],
+  "host_permissions": ["https://fuitesinfos.fr/*"],
+  "background": {
+    "service_worker": "src/background.js",
+    "scripts": ["src/index-key.js", "src/background.js"]
+  },
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_title": "Fuites Infos",
+    "default_icon": {
+      "16": "icons/f-idle-16.png",
+      "32": "icons/f-idle-32.png",
+      "48": "icons/f-idle-48.png",
+      "128": "icons/f-idle-128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["src/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["data/leaks-index.json", "icons/*"],
+      "matches": ["*://*/*"]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "fuites-infos@fuitesinfos.fr",
+      "strict_min_version": "121.0"
+    }
+  }
+}

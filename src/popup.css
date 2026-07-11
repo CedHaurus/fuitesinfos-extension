@@ -1,0 +1,71 @@
+:root {
+  --red: #dc2626;
+  --red-d: #991b1b;
+  --slate: #475569;
+  --ink: #111827;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --ok: #059669;
+}
+* { box-sizing: border-box; margin: 0; }
+body {
+  width: 320px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--ink);
+  background: #fff;
+}
+.hd {
+  display: flex; align-items: center; gap: 9px;
+  padding: 13px 16px; border-bottom: 1px solid var(--line);
+}
+.logo {
+  width: 26px; height: 26px; border-radius: 7px;
+  object-fit: cover; display: block; flex: 0 0 auto;
+}
+.brand { font-weight: 700; font-size: 14px; }
+
+main { padding: 16px; }
+.loading { color: var(--muted); font-size: 13px; text-align: center; padding: 12px 0; }
+
+/* --- Site concerné --- */
+.alert-title {
+  color: var(--red); font-weight: 800; font-size: 15px; line-height: 1.35; margin-bottom: 12px;
+}
+.card {
+  border: 1px solid var(--line); border-left: 3px solid var(--red);
+  border-radius: 10px; padding: 11px 12px; margin-bottom: 8px;
+}
+.card .name { font-weight: 700; font-size: 14px; }
+.card .row { display: flex; gap: 8px; align-items: center; margin-top: 5px; }
+.badge {
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+}
+.badge.conf { background: #fee2e2; color: var(--red-d); }
+.badge.rev { background: #fef3c7; color: #92400e; }
+.card .date { color: var(--muted); font-size: 12px; }
+.more { color: var(--muted); font-size: 12px; margin: 8px 2px 2px; }
+.cta {
+  display: block; text-align: center; margin-top: 12px; padding: 10px;
+  background: var(--red); color: #fff; text-decoration: none;
+  border-radius: 9px; font-weight: 700; font-size: 13px;
+}
+.cta:hover { background: var(--red-d); }
+
+/* --- Site sain --- */
+.ok-wrap { text-align: center; padding: 6px 0 2px; }
+.ok-ic {
+  width: 42px; height: 42px; border-radius: 50%; margin: 0 auto 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: #d1fae5; color: var(--ok); font-size: 22px; font-weight: 800;
+}
+.ok-title { font-weight: 700; font-size: 14px; }
+.ok-sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.host { color: var(--muted); font-size: 12px; margin-top: 8px; word-break: break-all; }
+
+.ft {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 16px; border-top: 1px solid var(--line);
+}
+.ft a { color: var(--red); text-decoration: none; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.ft a:hover { text-decoration: underline; }
+.meta { color: #9ca3af; font-size: 11px; white-space: nowrap; }

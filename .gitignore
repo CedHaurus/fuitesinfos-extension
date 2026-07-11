@@ -1,0 +1,12 @@
+# Secrets — jamais versionnés
+src/index-key.js
+# Liste des domaines (fournie au build, non publiée)
+data/
+# Mécanique serveur (endpoint, génération, nginx) — non publiée
+server/
+# Artefacts de build
+dist/
+*.zip
+node_modules/
+# OS
+.DS_Store
