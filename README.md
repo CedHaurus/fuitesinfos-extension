@@ -23,10 +23,8 @@ Aucune collecte de données personnelles. Voir la
 
 ## Installation
 
-- **Chrome / Edge / Brave** : `chrome://extensions` → mode développeur → « Charger l'extension
-  non empaquetée ». (Lien Chrome Web Store à venir.)
-- **Firefox (desktop et Android)** : `about:debugging` → « Charger un module complémentaire
-  temporaire ». (Lien AMO à venir.)
+- **Chrome / Edge / Brave** : [Chrome Web Store](https://chromewebstore.google.com/detail/mndohcgcbjiehimcfjpjbjmnookcdoji).
+- **Firefox (desktop et Android)** : [addons.mozilla.org](https://addons.mozilla.org/fr/firefox/addon/fuites-infos/).
 - **Safari** : conversion du dossier via `xcrun safari-web-extension-converter` (Xcode requis).
 
 ## Build
